@@ -13,12 +13,14 @@ class Assignment2
         BigInteger p = BigInteger.probablePrime(512, rnd);
         BigInteger q = BigInteger.probablePrime(512, rnd);
 
-        System.out.println(p);
+        // Calculate the product of these two primes n = pq
+        BigInteger primeProduct = p.multiply(q);
+        System.out.println(primeProduct);
+
     }
 }
 
-// Generate two distinct 512-bit probable primes p and q
-// Calculate the product of these two primes n = pq
+
 // Calculate the Euler totient function phi(n)
 // You will be using an encryption exponent e = 65537, so you will need to ensure that this is relatively prime to phi(n). If it is not, go back to step 1 and generate new values for p and q
 // Compute the value for the decryption exponent d, which is the multiplicative inverse of e (mod phi(n)). This should use your own implementation of the extended Euclidean GCD algorithm to calculate the inverse rather than using a library method for this purpose.
