@@ -15,7 +15,10 @@ class Assignment2
 
         // Calculate the product of these two primes n = pq
         BigInteger primeProduct = p.multiply(q);
-        System.out.println(primeProduct);
+
+        // Calculate the Euler totient function phi(n) φ(pq) = (p - 1)(q - 1)
+        BigInteger one = new BigInteger("1");
+        BigInteger phi = p.subtract(one).multiply(q.subtract(one));
 
     }
 }
@@ -28,5 +31,5 @@ class Assignment2
 /* 
 SOURCES used in aid of project 
 Probable Primes - https://www.tutorialspoint.com/java/math/biginteger_probableprime.htm
-
+Phi - https://stackoverflow.com/questions/20925656/how-to-compute-eulers-totient-function-%CF%86-in-java
 */
