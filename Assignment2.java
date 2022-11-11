@@ -21,7 +21,19 @@ class Assignment2
         BigInteger phi = p.subtract(one).multiply(q.subtract(one));
 
         BigInteger exponent = new BigInteger("65537");
-        
+
+
+    }
+
+    private static BigInteger relativePrime(BigInteger a, BigInteger b)
+    {
+        BigInteger zero = new BigInteger("0");
+        if (b.equals(zero)){
+            return a;
+        }
+        else{
+            return relativePrime(b, a.mod(b));
+        }
     }
 }
 
@@ -37,4 +49,7 @@ class Assignment2
 SOURCES used in aid of project 
 Probable Primes - https://www.tutorialspoint.com/java/math/biginteger_probableprime.htm
 Phi - https://stackoverflow.com/questions/20925656/how-to-compute-eulers-totient-function-%CF%86-in-java
+Relative Primes - https://www.baeldung.com/java-two-relatively-prime-numbers
+
+
 */
