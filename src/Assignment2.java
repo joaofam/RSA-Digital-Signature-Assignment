@@ -8,25 +8,39 @@ class Assignment2
 {
     public static void main(String [] args)
     {
+        BigInteger one = BigInteger.ONE;
         // 1: Generate two distinct 512-bit probable primes p and q
         BigInteger p = generatePrime();
         BigInteger q = generatePrime();
 
-        System.out.println(p);
+        System.out.println("prime values\n" + p);
         System.out.println(q);
 
         // 2: Calculate the product of these two primes n = pq
         BigInteger primeProduct = p.multiply(q);
 
         // 3: Calculate the Euler totient function phi(n) φ(pq) = (p - 1)(q - 1)
-        BigInteger one = new BigInteger("1");
-        BigInteger phi = p.subtract(one).multiply(q.subtract(one));
+        BigInteger phi = phi(p, q);
 
-        BigInteger exponent = new BigInteger("65537");
+        BigInteger exponent = BigInteger.valueOf(65537);
+
+        boolean relativePrime = true;
+
+        while(relativePrime){
+            if(!gcd(phi, exponent).equals(one)){
+                relativePrime = false;
+            }
+        }   
+
 
         
 
 
+    }
+    private static BigInteger phi(BigInteger p, BigInteger q){
+        BigInteger one = BigInteger.ONE;
+        BigInteger phi = p.subtract(one).multiply(q.subtract(one));
+        return phi;
     }
 
     private static BigInteger generatePrime(){
@@ -35,15 +49,11 @@ class Assignment2
         BigInteger p = BigInteger.probablePrime(512, rnd);
         return p;
     }
-    private static BigInteger relativePrime(BigInteger a, BigInteger b)
-    {
-        BigInteger zero = new BigInteger("0");
-        if (b.equals(zero)){
-            return a;
-        }
-        else{
-            return relativePrime(b, a.mod(b));
-        }
+    private static BigInteger gcd(BigInteger x, BigInteger y){
+        BigInteger one = BigInteger.ONE;
+        if (y.equals(one))
+            return x;
+        return gcd(y, x.mod(y));
     }
         // function to perform modular exponentiation 
     private static BigInteger modularExp(BigInteger a, BigInteger x, BigInteger n)
@@ -73,9 +83,12 @@ class Assignment2
 
 /* 
 SOURCES used in aid of project 
+BigInteger - https://www.geeksforgeeks.org/biginteger-valueof-method-in-java/
+             https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html
+gcd - https://www.baeldung.com/java-greatest-common-divisor
 Probable Primes - https://www.tutorialspoint.com/java/math/biginteger_probableprime.htm
 Phi - https://stackoverflow.com/questions/20925656/how-to-compute-eulers-totient-function-%CF%86-in-java
 Relative Primes - https://www.baeldung.com/java-two-relatively-prime-numbers
-
+RSA - https://stackoverflow.com/questions/52548429/coding-rsa-algorithm-java
 
 */
