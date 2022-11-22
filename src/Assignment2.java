@@ -1,7 +1,10 @@
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 import javax.crypto.*;
@@ -42,6 +45,8 @@ class Assignment2
 
         BigInteger d = multiplicateInverse(exponent, phi);
         System.out.println(d);
+
+
 
     }
 
@@ -125,27 +130,34 @@ class Assignment2
         return m;
       }
 
-      private Byte[] sha256Digest(String file) throws NoSuchAlgorithmException{
-
+    private String sha256Digest(String file) throws NoSuchAlgorithmException{
+        
+        byte[] messageBytes = Files.readAllBytes(Paths.get(file));
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
- 
-        // digest() method called
-        // to calculate message digest of an input
-        // and return array of byte
-        final byte[] hashBytes = digest.digest(file.getBytes(StandardCharsets.UTF_8));
-      }
+        byte[] messageHash = digest.digest(messageBytes);
 
-      private static String bytesToHex(byte[] hash) {
-        StringBuilder hexString = new StringBuilder(2 * hash.length);
-        for (byte b : hash) {
-          String hex = Integer.toHexString(0xff & b);
-          if (hex.length() == 1) {
-            hexString.append('0');
-          }
-          hexString.append(hex);
-        }
-        return hexString.toString();
-      }
+        return byteArrayToHex(messageHash);
+    }
+
+    private String byteArrayToHex(byte[] byteArray){
+        StringBuilder string = new StringBuilder(byteArray.length * 2);
+        for(byte b: byteArray)
+           string.append(String.format("%02x", b));
+        return string.toString();
+    }
+    }
+
+    //   private static String bytesToHex(byte[] hash) {
+    //     StringBuilder hexString = new StringBuilder(2 * hash.length);
+    //     for (byte b : hash) {
+    //       String hex = Integer.toHexString(0xff & b);
+    //       if (hex.length() == 1) {
+    //         hexString.append('0');
+    //       }
+    //       hexString.append(hex);
+    //     }
+    //     return hexString.toString();
+    //   }
 
 }
 
@@ -165,4 +177,7 @@ CRT & Multiplicate Inverse - https://www.geeksforgeeks.org/weak-rsa-decryption-c
                              https://en.wikibooks.org/wiki/Algorithm_Implementation/Mathematics/Extended_Euclidean_algorithm
                              https://loop.dcu.ie/mod/resource/view.php?id=1880897
 Modulus Power - https://www.google.com/search?q=biginteger+mod+to+the+power+of&oq=biginteger+mod+to+the+power+of+&aqs=chrome..69i57.7439j0j1&sourceid=chrome&ie=UTF-8
+Hashing - https://www.baeldung.com/java-digital-signature#:~:text=Technically%20speaking%2C%20a%20digital%20signature,algorithm%20are%20all%20then%20sent.
+          https://www.cesarsotovalero.net/blog/encoding-encryption-hashing-and-obfuscation-in-java.html
+
 */
