@@ -57,6 +57,7 @@ class Assignment2
         byte[] fileDigest = sha256Digest(fileContent);
 
         BigInteger message = new BigInteger(1, fileDigest);
+        System.out.println(message);
         BigInteger decrypt = decrypt(message, p, q, d);
 
         BufferedWriter writer = new BufferedWriter(new FileWriter("Modulus.txt"));
@@ -166,19 +167,6 @@ class Assignment2
            string.append(String.format("%02x", b));
         return string.toString();
     }
-
-    //   private static String bytesToHex(byte[] hash) {
-    //     StringBuilder hexString = new StringBuilder(2 * hash.length);
-    //     for (byte b : hash) {
-    //       String hex = Integer.toHexString(0xff & b);
-    //       if (hex.length() == 1) {
-    //         hexString.append('0');
-    //       }
-    //       hexString.append(hex);
-    //     }
-    //     return hexString.toString();
-    //   }
-
 }
 
 /* 
