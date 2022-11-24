@@ -14,10 +14,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 import javax.crypto.*;
+import javax.sound.midi.MidiChannel;
 
 class Assignment2
 {
-    private static final BigInteger BigInteger = null;
     public static void main(String [] args) throws IOException
     {
         BigInteger one = BigInteger.ONE;
@@ -25,21 +25,18 @@ class Assignment2
         BigInteger p = generatePrime();
         BigInteger q = generatePrime();
 
-        // System.out.println("prime values\n" + p);
-        // System.out.println(q);
-
         // 2: Calculate the product of these two primes n = pq
         BigInteger n = p.multiply(q);
 
         // 3: Calculate the Euler totient function phi(n) φ(pq) = (p - 1)(q - 1)
         BigInteger phi = phi(p, q);
-        // BigInteger phi = BigInteger.valueOf(17);
+        // BigInteger phi = BigInteger.valueOf(20);
 
-        // 4: You will be using an encryption exponent e = 65537, so you will need to ensure that this is 
-        //    relatively prime to phi(n). If it is not, go back to step 1 and generate new values for p and q
+        /* 4: You will be using an encryption exponent e = 65537, so you will need to ensure that this is 
+        relatively prime to phi(n). If it is not, go back to step 1 and generate new values for p and q */
 
         BigInteger exponent = BigInteger.valueOf(65537);
-        // BigInteger exponent = BigInteger.valueOf(40);
+        // BigInteger exponent = BigInteger.valueOf(17);
 
         boolean relativePrime = true;
 
@@ -50,40 +47,43 @@ class Assignment2
         }
         
         BigInteger d = multiplicateInverse(exponent, phi);
-        System.out.println(d);
         
-        // byte[] fileContent = Files.readAllBytes(Paths.get(args[0]));
-        byte[] fileContent = readFile(args[0]);
+        byte[] fileContent = Files.readAllBytes(Paths.get(args[0]));
+        // byte[] fileContent = readFile(args[0]);
         byte[] fileDigest = sha256Digest(fileContent);
 
         BigInteger message = new BigInteger(1, fileDigest);
-        System.out.println(message);
+
         BigInteger decrypt = decrypt(message, p, q, d);
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter("Modulus.txt"));
-        writer.write(n.toString(16));
-        writer.close();
-
-        BufferedWriter writer2 = new BufferedWriter(new FileWriter("Signature.txt"));
-        writer2.write(decrypt.toString(16));
-        writer2.close();
-        
-    }
-
-    private static byte[] readFile(String filename){
-        File file = new File(filename);
-        byte[] fileContent = (new byte[(int) file.length()]);
         try {
-            
-            FileInputStream modulus = new FileInputStream(file);
-            BufferedInputStream reader = new BufferedInputStream(modulus);
-            reader.close();
-        }  
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fileContent;
+            BufferedWriter writer = new BufferedWriter(new FileWriter("Modulus.txt"));
+            writer.write(n.toString(16));
+            writer.close();
+
+            BufferedWriter writer2 = new BufferedWriter(new FileWriter("Signature.txt"));
+            writer2.write(decrypt.toString(16));
+            writer2.close();
+        } 
+        catch (Exception e) {
+            e.getStackTrace();
+          }
     }
+
+    // private static byte[] readFile(String filename){
+    //     File file = new File(filename);
+    //     byte[] fileContent = (new byte[(int) file.length()]);
+    //     try {
+            
+    //         FileInputStream modulus = new FileInputStream(file);
+    //         BufferedInputStream reader = new BufferedInputStream(modulus);
+    //         reader.close();
+    //     }  
+    //     catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+    //     return fileContent;
+    // }
     private static BigInteger phi(BigInteger p, BigInteger q){
         BigInteger one = BigInteger.ONE;
         BigInteger phi = p.subtract(one).multiply(q.subtract(one));
@@ -131,6 +131,7 @@ class Assignment2
         }
         return result;
     }
+
     private static BigInteger decrypt(BigInteger hm, BigInteger p, BigInteger q, BigInteger d){
         // h(m)^d (mod n)
         // h(m) = s^e mod(n)
@@ -143,13 +144,13 @@ class Assignment2
         BigInteger m1 = hm.modPow(dp, p);
         BigInteger m2 = hm.modPow(dq, q);
 
-        BigInteger h = inverse.add(m1.subtract(m2)).mod(p);
+        BigInteger h = inverse.multiply(m1.subtract(m2)).mod(p);
         BigInteger m = m2.add(h.multiply(q));
 
         return m;
-      }
+    }
 
-    private static byte[] sha256Digest(byte[] file){
+    private static byte[] sha256Digest(byte[] file){;
         MessageDigest digest;
         byte[] messageHash = new byte[0];
         try {
@@ -159,13 +160,6 @@ class Assignment2
             e.printStackTrace();
         }
         return messageHash;
-    }
-
-    private static String byteArrayToHex(byte[] byteArray){
-        StringBuilder string = new StringBuilder(byteArray.length * 2);
-        for(byte b: byteArray)
-           string.append(String.format("%02x", b));
-        return string.toString();
     }
 }
 
@@ -192,5 +186,6 @@ BigInteger to hex - https://stackoverflow.com/questions/11918123/how-to-convert-
 String to BigInteger - https://stackoverflow.com/questions/15717240/how-do-i-convert-a-string-to-a-biginteger
 Read File - https://stackoverflow.com/questions/22630999/cannot-create-path-object-from-a-string
             https://www.baeldung.com/java-byte-arrays-hex-strings
+            https://www.programiz.com/java-programming/bufferedwriter
 File to bytes - https://stackoverflow.com/questions/858980/file-to-byte-in-java
 */
