@@ -1,20 +1,13 @@
 
-import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Random;
-import javax.crypto.*;
-import javax.sound.midi.MidiChannel;
 
 class Assignment2
 {
@@ -30,26 +23,25 @@ class Assignment2
 
         // 3: Calculate the Euler totient function phi(n) φ(pq) = (p - 1)(q - 1)
         BigInteger phi = phi(p, q);
-        // BigInteger phi = BigInteger.valueOf(20);
 
         /* 4: You will be using an encryption exponent e = 65537, so you will need to ensure that this is 
         relatively prime to phi(n). If it is not, go back to step 1 and generate new values for p and q */
 
         BigInteger exponent = BigInteger.valueOf(65537);
-        // BigInteger exponent = BigInteger.valueOf(17);
 
         boolean relativePrime = true;
-
         while(relativePrime){
             if(!gcd(phi, exponent).equals(one)){
                 relativePrime = false;
             }
         }
-        
+        /* 5. Compute the value for the decryption exponent d, which is the multiplicative inverse 
+        of e (mod phi(n)). This should use your own implementation of the extended Euclidean GCD 
+        algorithm to calculate the inverse rather than using a library method for this purpose.*/
         BigInteger d = multiplicateInverse(exponent, phi);
         
         byte[] fileContent = Files.readAllBytes(Paths.get(args[0]));
-        // byte[] fileContent = readFile(args[0]);
+
         byte[] fileDigest = sha256Digest(fileContent);
 
         BigInteger message = new BigInteger(1, fileDigest);
@@ -64,34 +56,22 @@ class Assignment2
             BufferedWriter writer2 = new BufferedWriter(new FileWriter("Signature.txt"));
             writer2.write(decrypt.toString(16));
             writer2.close();
+            
+            System.out.print(decrypt.toString(16));
         } 
         catch (Exception e) {
             e.getStackTrace();
           }
     }
-
-    // private static byte[] readFile(String filename){
-    //     File file = new File(filename);
-    //     byte[] fileContent = (new byte[(int) file.length()]);
-    //     try {
-            
-    //         FileInputStream modulus = new FileInputStream(file);
-    //         BufferedInputStream reader = new BufferedInputStream(modulus);
-    //         reader.close();
-    //     }  
-    //     catch (IOException e) {
-    //         e.printStackTrace();
-    //     }
-    //     return fileContent;
-    // }
+    // sourced - https://stackoverflow.com/questions/20925656/how-to-compute-eulers-totient-function-%CF%86-in-java
     private static BigInteger phi(BigInteger p, BigInteger q){
         BigInteger one = BigInteger.ONE;
         BigInteger phi = p.subtract(one).multiply(q.subtract(one));
         return phi;
     }
 
+    // sourced - https://stackoverflow.com/questions/15056184/how-do-i-generate-a-160-bit-prime-number-in-java
     private static BigInteger generatePrime(){
-        // create a random object
         SecureRandom rnd = new SecureRandom();
         BigInteger p = BigInteger.probablePrime(512, rnd);
         return p;
@@ -103,35 +83,33 @@ class Assignment2
         return gcd(y, x.mod(y));
     }
 
-  public static BigInteger multiplicateInverse(BigInteger e, BigInteger phiValue){
-        BigInteger x0 = BigInteger.ONE, x1 = BigInteger.ZERO;
-        BigInteger y0 = BigInteger.ZERO, y1 = BigInteger.ONE;
-        BigInteger q;
-        BigInteger tmp;
-        BigInteger phi = phiValue;
-        BigInteger result = BigInteger.ONE;
-        BigInteger zero = BigInteger.ZERO;
+    // sourced - https://stackoverflow.com/questions/39437988/java-modular-multiplicative-inverse/67897488#67897488
+    private static BigInteger[] extendedGCD(BigInteger a, BigInteger b) {
+        if(b.equals(BigInteger.ZERO))
+            return new BigInteger[] {a, BigInteger.ONE, BigInteger.ZERO};
+        else {
+            BigInteger[] arr = extendedGCD(b, a.mod(b));
 
-        while(!e.equals(zero)){
+            BigInteger gcd = arr[0];
+            BigInteger Y = arr[1].subtract(((a.divide(b))).multiply(arr[2]));
+            BigInteger X = arr[2];
 
-        q = phiValue.divide(e); //
-        tmp = x1.subtract(q.multiply(x0));
-
-        x1 = x0;
-        x0 = tmp;
-        tmp = y1.subtract(q.multiply(y0));
-
-        y1 = y0;
-        y0 = tmp;
-        tmp = e;
-        e = phiValue.mod(e);
-        phiValue = tmp;
-
-        result = x1.add(phi).mod(phi);
+        return new BigInteger[] {gcd, X, Y};
         }
-        return result;
     }
 
+    private static BigInteger multiplicateInverse(BigInteger exponent, BigInteger phi){
+        BigInteger[] extGCDValues = extendedGCD(exponent, phi);
+
+        if (!extGCDValues[0].equals(BigInteger.ONE))
+            return BigInteger.ZERO;
+        if (extGCDValues[1].compareTo(BigInteger.ZERO) == 1)
+            return extGCDValues[1];
+        else
+            return extGCDValues[1].add(phi);
+    }
+
+    // sourced - https://www.geeksforgeeks.org/weak-rsa-decryption-chinese-remainder-theorem/
     private static BigInteger decrypt(BigInteger hm, BigInteger p, BigInteger q, BigInteger d){
         // h(m)^d (mod n)
         // h(m) = s^e mod(n)
@@ -149,7 +127,7 @@ class Assignment2
 
         return m;
     }
-
+    // sourced - https://www.baeldung.com/java-digital-signature#:~:text=Technically%20speaking%2C%20a%20digital%20signature,algorithm%20are%20all%20then%20sent
     private static byte[] sha256Digest(byte[] file){;
         MessageDigest digest;
         byte[] messageHash = new byte[0];
@@ -173,11 +151,12 @@ Probable Primes - https://www.tutorialspoint.com/java/math/biginteger_probablepr
 Phi - https://stackoverflow.com/questions/20925656/how-to-compute-eulers-totient-function-%CF%86-in-java
 Relative Primes - https://www.baeldung.com/java-two-relatively-prime-numbers
 RSA - https://stackoverflow.com/questions/52548429/coding-rsa-algorithm-java
-Multiplicate Inverse - https://www.sanfoundry.com/java-program-extended-euclid-algorithm/
-CRT & Multiplicate Inverse - https://www.geeksforgeeks.org/weak-rsa-decryption-chinese-remainder-theorem/
+CRT & Multiplicate Inverse - https://stackoverflow.com/questions/39437988/java-modular-multiplicative-inverse/67897488#67897488
+                             https://www.geeksforgeeks.org/weak-rsa-decryption-chinese-remainder-theorem/
                              https://medium.com/free-code-camp/how-to-implement-the-chinese-remainder-theorem-in-java-db88a3f1ffe0
                              https://en.wikibooks.org/wiki/Algorithm_Implementation/Mathematics/Extended_Euclidean_algorithm
                              https://loop.dcu.ie/mod/resource/view.php?id=1880897
+                             https://www.sanfoundry.com/java-program-extended-euclid-algorithm/
 Modulus Power - https://www.google.com/search?q=biginteger+mod+to+the+power+of&oq=biginteger+mod+to+the+power+of+&aqs=chrome..69i57.7439j0j1&sourceid=chrome&ie=UTF-8
 Hashing - https://www.baeldung.com/java-digital-signature#:~:text=Technically%20speaking%2C%20a%20digital%20signature,algorithm%20are%20all%20then%20sent.
           https://www.baeldung.com/java-digital-signature#:~:text=Technically%20speaking%2C%20a%20digital%20signature,algorithm%20are%20all%20then%20sent.
