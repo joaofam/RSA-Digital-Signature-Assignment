@@ -1,2 +1,0 @@
-javac Assignment2.java
-java Assignment2
